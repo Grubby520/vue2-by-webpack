@@ -3,6 +3,15 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
+// compiler.plugin is not a function
+// const PreloadWebpackPlugin = require('preload-webpack-plugin');
+
+// 没生效
+// const ResourceHintWebpackPlugin = require('resource-hints-webpack-plugin');
+
+const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin');
+const CompressionPlugin = require('compression-webpack-plugin')
+
 function resolve(dirName) {
   return path.resolve(__dirname, dirName);
 }
@@ -98,9 +107,42 @@ const config = {
       template: 'public/index.html',
       inject: true,
       favicon: resolve('public/favicon.ico')
-    })
+    }),
+
+    // new PreloadWebpackPlugin({
+    //   rel: 'preload',
+    //   include: 'initial',
+    //   // 文件黑名单
+    //   fileBlacklist: [
+    //     /\.map$/,
+    //     /hot-update\.js$/
+    //   ]
+    // }),
+
+    // new PreloadWebpackPlugin({
+    //   rel: 'preload',
+    //   include: 'asyncChunks'
+    // }),
+
+    // new ResourceHintWebpackPlugin(),
+
+    new PreloadWebpackPlugin({
+      rel: 'preload',
+      include: 'initial',
+      fileBlacklist: [
+        /\.map$/,
+        /hot-update\.js$/
+      ]
+    }),
+
+    new PreloadWebpackPlugin({
+      rel: 'prefetch',
+      include: 'asyncChunks'
+    }),
+
+    new CompressionPlugin(),
   ],
-  devtool: 'source-map',
+  // devtool: 'source-map',
   optimization: {
     moduleIds: 'deterministic',
     runtimeChunk: 'single',
@@ -110,7 +152,7 @@ const config = {
       minSize: 2000,
       minRemainingSize: 0,
       minChunks: 1,
-      maxAsyncRequests: 30, 
+      maxAsyncRequests: 30,
       maxInitialRequests: 30,
       enforceSizeThreshold: 50000,
       // 缓存组
