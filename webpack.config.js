@@ -21,7 +21,9 @@ const config = {
   output: {
     path: resolve('dist'),
     filename: 'js/[name].[contenthash:8].js',
-    chunkFilename: 'js/[name].[contenthash:8].js'
+    publicPath: '/',
+    chunkFilename: 'js/chunk-[name].[contenthash:8].js',
+    clean: true
   },
   devServer: {
     // open: true,
@@ -59,6 +61,9 @@ const config = {
       {
         test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
         type: "asset",
+        generator: {
+          filename: 'static/[name].[hash:8].[ext]'
+        }
       }
     ]
   },
@@ -90,14 +95,54 @@ const config = {
 
     new HtmlWebpackPlugin({
       title: 'vue2',
-      template: 'public/index.html'
+      template: 'public/index.html',
+      inject: true,
+      favicon: resolve('public/favicon.ico')
     })
-  ]
+  ],
+  devtool: 'source-map',
+  optimization: {
+    moduleIds: 'deterministic',
+    runtimeChunk: 'single',
+    splitChunks: {
+      // 一般采用默认的就行了
+      chunks: 'all',
+      minSize: 2000,
+      minRemainingSize: 0,
+      minChunks: 1,
+      maxAsyncRequests: 30, 
+      maxInitialRequests: 30,
+      enforceSizeThreshold: 50000,
+      // 缓存组
+      cacheGroups: {
+        vendors: {
+          name: 'chunk-vendors',
+          test: /[\\/]node_modules[\\/]/,
+          priority: -10,
+          chunks: 'initial', // initial | all
+        },
+        common: {
+          name: 'chunk-common',
+          chunks: 'initial',
+          minChunks: 2,
+          priority: -20,
+          reuseExistingChunk: true
+        }
+      }
+    },
+    // production 默认 会开启 TerserPlugin，这里定义是为了 override 默认配置
+    // minimizer: [{}],
+  }
 }
 
 module.exports = () => {
   if (isProduction) {
     config.mode = 'production'
+
+    config.plugins.push(new MiniCssExtractPlugin({
+      filename: 'css/[name].[contenthash:8].css',
+      chunkFilename: 'css/chunk-[name].[contenthash:8].css'
+    }))
   } else {
     config.mode = 'development'
   }
