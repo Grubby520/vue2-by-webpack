@@ -24,6 +24,17 @@ const stylesHandler = isProduction
   ? MiniCssExtractPlugin.loader
   : 'vue-style-loader'
 
+const cdn = {
+  css: ['https://unpkg.com/element-ui@2.15.3/lib/theme-chalk/index.css'],
+  js: [
+    'https://cdn.jsdelivr.net/npm/vue@2.6.11',
+    'https://unpkg.com/vuex@3.6.2/dist/vuex.min.js',
+    'https://unpkg.com/vue-router@3.5.2/dist/vue-router.js',
+    'https://unpkg.com/element-ui@2.15.3/lib/index.js'
+    // 'https://unpkg.com/axios/dist/axios.min.js',
+  ],
+}
+
 // 定义配置项
 const config = {
   entry: './src/main.js',
@@ -106,7 +117,8 @@ const config = {
       title: 'vue2',
       template: 'public/index.html',
       inject: true,
-      favicon: resolve('public/favicon.ico')
+      favicon: resolve('public/favicon.ico'),
+      cdn
     }),
 
     // new PreloadWebpackPlugin({
@@ -174,6 +186,13 @@ const config = {
     },
     // production 默认 会开启 TerserPlugin，这里定义是为了 override 默认配置
     // minimizer: [{}],
+  },
+  // 疑问？左边是使用的第三方包的名称，右边这个怎么对应起来呢？
+  externals: {
+    vue: 'Vue', // 规则 - {import xx from 'vue'} 属性名 vue 就是 from 的那个模块 vue。
+    vuex: 'Vuex',
+    'vue-router': 'VueRouter',
+    'element-ui': 'ELEMENT'
   }
 }
 
